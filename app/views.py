@@ -5,11 +5,13 @@ Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
 This file creates your application.
 """
 
+from flask import Flask  
 from app import app, db, login_manager
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user, login_required
-from app.forms import LoginForm
-from app.models import UserProfile
+from app.forms import LoginForm,RegisterForm,CarForm
+from app.models import Users,Cars,Favourites
+from app.config import *
 
 
 ###
@@ -31,10 +33,10 @@ def about():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
-    if request.method == "POST":
+    #if request.method == "POST":
         # change this to actually validate the entire form submission
         # and not just one field
-        if form.username.data:
+        #if form.username.data:
             # Get the username and password values from the form.
 
             # using your model, query database for a user based on the username
@@ -44,18 +46,19 @@ def login():
             # passed to the login_user() method below.
 
             # get user id, load into session
-            login_user(user)
+            #login_user(user)
 
             # remember to flash a message to the user
-            return redirect(url_for("home"))  # they should be redirected to a secure-page route instead
+            #return redirect(url_for("home"))  # they should be redirected to a secure-page route instead
     return render_template("login.html", form=form)
+
 
 
 # user_loader callback. This callback is used to reload the user object from
 # the user ID stored in the session
 @login_manager.user_loader
 def load_user(id):
-    return UserProfile.query.get(int(id))
+    return Users.query.get(int(id))
 
 ###
 # The functions below should be applicable to all Flask apps.
