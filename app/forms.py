@@ -16,7 +16,7 @@ class RegisterForm(FlaskForm):
     fullname = StringField('Fullname', validators=[InputRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     location = StringField('Location', validators=[InputRequired()])
-    bio= TextAreaField('Biography', validators=[DataRequired()])
+    bio= TextAreaField('Biography', validators=[InputRequired()])
     pic=FileField('Upload Photo',validators=[FileRequired(),FileAllowed(['jpg','png'],'Images only!')])
 
 

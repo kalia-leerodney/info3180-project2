@@ -3,13 +3,14 @@ from werkzeug.security import generate_password_hash
 from flask_login._compat import unicode
 
 
+
 class Cars(db.Model):
     __tablename__ = 'cars'
 
     id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.String(80))
-    make = db.Column(db.String(80))
-    model = db.Column(db.String(80))
+    description = db.Column(db.String(255))
+    make = db.Column(db.String(255))
+    model = db.Column(db.String(255))
     colour=db.Column(db.String(255))
     year=db.Column(db.String(255))
     transmission=db.Column(db.String(255))
@@ -46,16 +47,16 @@ class Users(db.Model):
     __tablename__ = 'users'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80))
-    password = db.Column(db.String(80))
-    name = db.Column(db.String(80))
+    username = db.Column(db.String(255))
+    password = db.Column(db.String(255))
+    name = db.Column(db.String(255))
     email=db.Column(db.String(255))
     location=db.Column(db.String(255))
     biography=db.Column(db.String(255))
     photo=db.Column(db.String(255))
     date_joined=db.Column(db.DateTime)
 
-    def __init__(self, username, password, name, email, location, biography, photo, date_joined):
+    def __init__(self, username, password, name, email, location, biography, photo,date_joined):
         self.username = username
         self.password = generate_password_hash(password, method='pbkdf2:sha256')
         self.name = name
@@ -63,7 +64,7 @@ class Users(db.Model):
         self.location= location
         self.biography=biography
         self.photo= photo
-        self.date= date_joined
+        self.date_joined= date_joined
 
 
     def is_authenticated(self):
