@@ -143,7 +143,6 @@ const LoginForm = {
 
 };
 
-
 const RegisterForm = {
     name: "register-form",
     data(){
@@ -151,8 +150,7 @@ const RegisterForm = {
             isSuccessUpload:false,
             displayFlash:false,
             successmessage:"",
-            errormessage:"",
-            
+            errormessage:"",      
         }
     },
 
@@ -226,11 +224,99 @@ const RegisterForm = {
 
 };
 
+const CarForm = {
+    name: "car-form",
+    data(){
+        return{
+            isSuccessUpload:false,
+            displayFlash:false,
+            successmessage:"",
+            errormessage:"",      
+        }
+    },
+
+    template:`
+    <div>
+    <h2> Add New Car </h2>
+    <div  v-if="isSuccessUpload"> </div>
+   
+    <form v-on:submit.prevent="registerCar" method="POST" enctype="multipart/form-data" id="carForm">
+
+    <div class="form-group">
+
+        <label> Make </label><br>
+        <input type="text" name="make"><br>
+
+        <label> Model </label><br>
+        <input type="text" name="model"><br>
+
+        <label> Colour </label><br>
+        <input type="text" name="colour"><br>
+  
+        <label> Year </label><br>
+        <input type="text" name="year"><br>
+
+        <label> Car Type </label><br>
+        <select name="cartype"> </select><br>
+        <option v-for=cartype=cartype > {{cartype}} </option><br>
+
+        <label> Transmission </label><br>
+        <select name="transmission"> </select><br>
+        <option value={{cartype}}>  </option>
+
+
+        <label> Description </label><br>
+        <textarea name="description"> </textarea><br>
+
+        <label> Upload Photo: </label><br>
+        <input type="file" name="pic">
+
+    </div>
+        <button class="btn btn-primary mb-2" > Save </button>
+    </form>
+    </div>
+    
+    `,
+
+    methods: {
+        registerCar(){
+            let carForm = document.getElementById('carForm');
+            let form_data = new FormData(carForm);
+            fetch("/api/cars", {
+                method: 'POST',
+                body: form_data,
+                headers: {
+                    'X-CSRFToken': token
+                     },
+                     credentials: 'same-origin'
+               })
+                .then(function (response) {
+                return response.json();
+                })
+                .then(function (jsonResponse) {
+                //isSuccessUpload = true
+                //this.successmessage = "File Uploaded Successfully"
+                // display a success message
+                console.log(jsonResponse);
+                })
+                .catch(function (error) {
+                //this.errormessage = "Something went wrong"
+                console.log(error);
+                });
+
+            }
+
+    },  
+
+};
+
 // Define Routes
 const routes = [
     { path: "/", component: Home },
     { path: "/register" , component: RegisterForm},
     { path: "/login" , component: LoginForm},
+    { path: "/cars/new" , component: CarForm},
+
 
     
     // Put other routes here

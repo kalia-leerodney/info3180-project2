@@ -106,6 +106,7 @@ def car():
             desc=request.form['description']
             pic=request.files['pic'] # or form.pic.data
             filename=secure_filename(pic.filename)
+            car=Cars(make=make,model=model,colour=colour, year=year, cartype=cartype, transmission=trans,description=desc,photo=filename)
             #car=Cars(description=desc, make=make, model=model, colour=colour, year=year, transmission=trans, car_type=cartype, price=price, photo=pic, user_id=current_user.user_id )
             if car is not None:
                 db.session.add(car)
