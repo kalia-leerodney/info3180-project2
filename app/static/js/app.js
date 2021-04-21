@@ -12,7 +12,7 @@ app.component('app-header', {
     name: 'AppHeader',
     template: `
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-      <a class="navbar-brand" href="#">Lab 7</a>
+      <a class="navbar-brand" href="#">United Auto Sales</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -25,13 +25,58 @@ app.component('app-header', {
           <li class="nav-item active">
             <router-link class="nav-link" to="/register"> Register <span class="sr-only">(current)</span></router-link>
           </li>
-          <li class="nav-item active">
-            <router-link class="nav-link" to="/login"> Login <span class="sr-only">(current)</span></router-link>
+          <li v-if="!status_log" class="nav-item active">
+            <router-link class="nav-link" to="/login">Login <span class="sr-only">(current)</span></router-link>
+          </li>
+          <li v-else class="nav-item active">
+            <router-link class="nav-link" to="/logout">Logout <span class="sr-only">(current)</span></router-link>
           </li>
         </ul>
       </div>
     </nav>
-    `
+    `,
+
+    computed: {
+        status_log: function() {
+            if (sessionStorage.getItem('token')) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    },
+
+    methods: {
+        profile: function(){ 
+            //this.$router.push("/users/"+userid)
+            location.reload();
+        }
+    },
+
+    data: function(){
+        return {
+            c_user: 0
+        }
+    },
+
+    created: function(){
+        let self = this;
+        fetch('/api/secure', {
+            'headers': {
+                'Authorization': 'Bearer ' + sessionStorage.getItem('token')
+            }
+        }).then(function (response) {
+                return response.json();
+            }).then(function (response) {
+                let result = response.data;
+                console.log("User ID retrieved");
+                self.c_user = result.user.id;
+                //return result.user.id;
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
 });
 
 app.component('app-footer', {
@@ -53,15 +98,23 @@ app.component('app-footer', {
 const Home = {
     name: 'Home',
     template: `
-    <div class="jumbotron">
-        <h1>Project 2</h1>
-        <p class="lead">In this lab we will demonstrate VueJS working with Forms and Form Validation from Flask-WTF.</p>
+    <div class="container">
+        <div class = "left">
+            <h2> Buy and Sell Cars Online </h2>
+            <p> United Sales XYZ </p>
+            <button id="home_btn1" @click="$router.push('register')" type="button" class="btn btn-success">Register</button>
+            <button id="home_btn2" @click="$router.push('login')" type="button" class="btn btn-primary">Login</button>
+        </div>
+        <div class = "image">
+            <img src="/static/car.jpeg" alt="car img">
+        </div>
     </div>
     `,
     data() {
         return {}
     }
 };
+
 
 const NotFound = {
     name: 'NotFound',
@@ -107,8 +160,12 @@ const LoginForm = {
     </form>
     </div>
     
-    `,
-
+    `,data: function() {
+        return {
+            messages: '',
+            token: ''
+        }
+     },
     methods: {
         loginUser(){
             let loginForm = document.getElementById('loginForm');
@@ -125,13 +182,17 @@ const LoginForm = {
                 return response.json();
                 })
                 .then(function (jsonResponse) {
-                //isSuccessUpload = true
-                //this.successmessage = "File Uploaded Successfully"
-                // display a success message
                 console.log(jsonResponse);
+                self.messages = jsonResponse;
+                let tkn_jwt = jsonResponse.data.token;
+                sessionStorage.setItem('token', tkn_jwt);
+                console.info('Token stored in sessionStorage.');
+                self.token = tkn_jwt;
+                alert("Logged In!")
+                router.push("/cars/new")
+                /*location.reload()*/
                 })
                 .catch(function (error) {
-                //this.errormessage = "Something went wrong"
                 console.log(error);
                 });
 
@@ -256,13 +317,26 @@ const CarForm = {
         <label> Year </label><br>
         <input type="text" name="year"><br>
 
+        <label> Price </label><br>
+        <input type="text" name="price"><br>
+
+
         <label> Car Type </label><br>
-        <select name="cartype"> </select><br>
-        <option v-for=cartype=cartype > {{cartype}} </option><br>
+        <select name="cartype"> 
+        <option value="SUV"> SUV </option>
+        <option value="Sports Car"> Sports Car </option>
+        <option value="Sedan"> Sedan </option>
+        <option value="Coupe"> Coupe </option>
+        </select><br>
+
+       
 
         <label> Transmission </label><br>
-        <select name="transmission"> </select><br>
-        <option value={{cartype}}>  </option>
+        <select name="transmission"> 
+        <option value=Automatic> Automatic </option>
+        <option value=Manual> Manual </option>
+
+        </select><br>
 
 
         <label> Description </label><br>
