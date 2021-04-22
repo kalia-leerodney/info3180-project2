@@ -25,6 +25,14 @@ app.component('app-header', {
           <li class="nav-item active">
             <router-link class="nav-link" to="/register"> Register <span class="sr-only">(current)</span></router-link>
           </li>
+          <li class="nav-item active">
+          <router-link class="nav-link" to="/cars/new"> Add Car <span class="sr-only">(current)</span></router-link>
+        </li>
+
+        <li class="nav-item active">
+          <router-link class="nav-link" to="/explore"> Explore <span class="sr-only">(current)</span></router-link>
+        </li>
+         
           <li v-if="!status_log" class="nav-item active">
             <router-link class="nav-link" to="/login">Login <span class="sr-only">(current)</span></router-link>
           </li>
@@ -69,7 +77,7 @@ app.component('app-header', {
                 return response.json();
             }).then(function (response) {
                 let result = response.data;
-                console.log("User ID retrieved");
+                //console.log("User ID retrieved");
                 self.c_user = result.user.id;
                 //return result.user.id;
             })
@@ -98,17 +106,20 @@ app.component('app-footer', {
 const Home = {
     name: 'Home',
     template: `
-    <div class="container">
-        <div class = "left">
+    <div class = 'home-page'>
+        
+        <div class = "middle">
             <h2> Buy and Sell Cars Online </h2>
-            <p> United Sales XYZ </p>
-            <button id="home_btn1" @click="$router.push('register')" type="button" class="btn btn-success">Register</button>
-            <button id="home_btn2" @click="$router.push('login')" type="button" class="btn btn-primary">Login</button>
+            <p> United Auto Sales provides the fastest, easiest and most user friendly way to buy or sell cars online</p>
+
+            <div class = 'btns'>
+                <button id="reg_btn" @click="$router.push('register')" type="button" class="btn btn-success">Register</button>
+                <button id="login_btn" @click="$router.push('login')" type="button" class="btn btn-primary">Login</button>
+            </div>
         </div>
-        <div class = "image">
-            <img src="/static/car.jpeg" alt="car img">
-        </div>
+    
     </div>
+
     `,
     data() {
         return {}
@@ -130,34 +141,33 @@ const NotFound = {
 
 const LoginForm = {
     name: "login-form",
-    data(){
-        return{
-            isSuccessUpload:false,
-            displayFlash:false,
-            successmessage:"",
-            errormessage:"",
+    // data(){
+    //     return{
+    //         isSuccessUpload:false,
+    //         displayFlash:false,
+    //         successmessage:"",
+    //         errormessage:"",
             
-        }
-    },
+    //     }
+    // },
 
     template:`
-    <div>
-    <h2> Login to your account </h2>
-    <div  v-if="isSuccessUpload"> </div>
-   
-    <form v-on:submit.prevent="loginUser" method="POST" enctype="multipart/form-data" id="loginForm">
+    <div class = 'login-container'>
+        <h2> Login to your account </h2>
+    
+        <form v-on:submit.prevent="loginUser" method="POST" enctype="multipart/form-data" id="loginForm">
 
-    <div class="form-group">
+        <div class="form-group">
 
-        <label> Username </label><br>
-        <input type="text" name="username"><br>
+            <label> Username </label><br>
+            <input type="text" name="username"><br>
 
-        <label> Password </label><br>
-        <input type="password" name="password"><br>
+            <label> Password </label><br>
+            <input type="password" name="password"><br>
 
-    </div>
-        <button class="btn btn-primary mb-2" > Login </button>
-    </form>
+        </div>
+            <button class="btn btn-primary mb-2" > Login </button>
+        </form>
     </div>
     
     `,data: function() {
@@ -200,25 +210,58 @@ const LoginForm = {
 
     },  
 
-
-
 };
+
+const Logout = {
+    name:"logout",
+    template:`
+        <div>Logging out...</div>
+    
+    `,
+
+    methods: {
+        logOut: function () {
+            let self = this;
+            fetch("/api/auth/logout", { method: 'GET', headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') }})
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (response) {
+                    let result = response.data;
+                    alert(result.user.username + " logged out!")
+                    sessionStorage.removeItem('token');
+                    console.info('Token removed from sessionStorage.');
+                    router.push("/")
+                    location.reload()
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+        }
+    },
+
+    beforeMount(){
+        this.logOut()
+    }
+};
+
+    
+
 
 const RegisterForm = {
     name: "register-form",
-    data(){
-        return{
-            isSuccessUpload:false,
-            displayFlash:false,
-            successmessage:"",
-            errormessage:"",      
-        }
-    },
+    // data(){
+    //     return{
+    //         isSuccessUpload:false,
+    //         displayFlash:false,
+    //         successmessage:"",
+    //         errormessage:"",      
+    //     }
+    // },
 
     template:`
     <div>
     <h2> Register New User </h2>
-    <div  v-if="isSuccessUpload"> </div>
    
     <form v-on:submit.prevent="registerUser" method="POST" enctype="multipart/form-data" id="registerForm">
 
@@ -287,19 +330,19 @@ const RegisterForm = {
 
 const CarForm = {
     name: "car-form",
-    data(){
-        return{
-            isSuccessUpload:false,
-            displayFlash:false,
-            successmessage:"",
-            errormessage:"",      
-        }
-    },
+    // data(){
+    //     return{
+    //         isSuccessUpload:false,
+    //         displayFlash:false,
+    //         successmessage:"",
+    //         errormessage:"",      
+    //     }
+    // },
 
     template:`
     <div>
     <h2> Add New Car </h2>
-    <div  v-if="isSuccessUpload"> </div>
+   
    
     <form v-on:submit.prevent="registerCar" method="POST" enctype="multipart/form-data" id="carForm">
 
@@ -359,10 +402,11 @@ const CarForm = {
             fetch("/api/cars", {
                 method: 'POST',
                 body: form_data,
-                headers: {
+                headers: {'Authorization': 'Bearer ' + sessionStorage.getItem('token') ,
                     'X-CSRFToken': token
                      },
                      credentials: 'same-origin'
+                     
                })
                 .then(function (response) {
                 return response.json();
@@ -384,12 +428,208 @@ const CarForm = {
 
 };
 
+const Explore = {
+    name: "explore",
+    /*data(){
+        return{
+            isSuccessUpload:false,
+            displayFlash:false,
+            successmessage:"",
+            errormessage:"",      
+        }
+    },*/
+
+    template:`
+    <div>
+    <h2> Explore </h2>
+    
+   
+    <form v-on:submit.prevent="exploreSearch" method="GET" enctype="multipart/form-data" id="searchForm">
+
+    <div class="form-group">
+
+        <label> Make </label><br>
+        <input type="text" name="searchbymake" v-model="searchMake"><br>
+
+        <label> Model </label><br>
+        <input type="text" name="searchbymodel" v-model="searchModel"><br>
+
+       
+    </div>
+        <button class="btn btn-primary mb-2" > Search </button>
+    </form>
+    </div>
+
+    <ul>
+    <li v-for="car in allcars">
+
+    <img id="car_img" :src="'/static/uploads/' + car.photo" alt="car img"> 
+    <p>  {{car.year}}  </p>
+    <p>  {{car.price}}  </p>
+    <p>  {{car.model}}  </p>
+    <p>  {{car.make}}  </p>
+    <button @click="carinfo(car.id)"> View More Details </button>
+   
+
+    </li>
+
+    </ul>
+
+    
+    `,
+    data: function() {
+        return {
+            allcars: [],
+            userid: 0,
+            searchMake: '',
+            searchModel: ''
+        }
+     },
+
+    methods: {
+        exploreSearch(){
+            let self = this;
+            fetch('/api/search?searchbymake='+self.searchMake+ '&searchbymodel='+self.searchModel, {
+                method: 'GET',
+                headers:{ 'Authorization': 'Bearer ' + sessionStorage.getItem('token'),'X-CSRFToken': token } 
+               })
+                .then(function (response) {
+                return response.json();
+                })
+                .then(function (jsonResponse) {
+                self.allcars=jsonResponse.searchedcars
+                console.log(jsonResponse);
+                })
+                .catch(function (error) {
+                //this.errormessage = "Something went wrong"
+                console.log(error);
+                });
+
+            },
+
+            pagestart: function(){
+                let self = this;
+                fetch("/api/cars", { method: 'GET', headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') }})
+                        .then(function (response) {
+                            return response.json();
+                            })
+                            .then(function (jsonResponse) {
+                                // display a success message
+                                self.allcars=jsonResponse.allcars.slice(-3);
+                                console.log(jsonResponse.allcars.slice(-3));
+                                console.log(jsonResponse.test);
+                                //console.log(jsonResponse.allcars);
+                                
+                            })
+                            .catch(function (error) {
+                                    console.log(error);
+                                });
+                    },
+                    carinfo: function(car_id){ 
+                        this.$router.push("/cars/"+car_id)
+                       
+                    },
+
+
+    },
+    created: function(){
+        this.pagestart();
+    }
+};
+
+const CarInfo = {
+    name: "carinfo",
+    props: ['car_id'],
+    template: `
+
+    <div>
+    <h2>  {{year}} </h2>  <h2> {{make}} </h2> <br> 
+    <p> {{model}} </p>  
+    <p> {{description}} </p> <br>
+    <p> {{colour}} </p> <br>
+    <p> {{car_type}} </p> <br>
+    <p> {{price}} </p> <br>
+    <p> {{transmission}} </p>
+    <img id="car_img" :src="'/static/uploads/' + photo" alt="car img"> 
+
+    <button class="btn btn-primary mb-2" > Email Owner </button>
+    <button class="btn btn-primary mb-2" > Favourites </button>
+
+    </div>
+    
+    `,
+    data: function() {
+        return {
+            
+            year:"",
+            price:0,
+            model:"",
+            description:"",
+            colour:"",
+            transmission:"",
+            make:"",
+            car_type:"",
+            photo:""
+
+            
+
+        }
+     },created: function(){
+        let self = this;
+        this.viewCarinfo(self.car_id);
+    },
+
+    methods: {
+        viewCarinfo(car_id){
+            let self = this;
+            fetch('/api/cars/' + car_id, {
+                method: 'GET',
+                headers:{ 'Authorization': 'Bearer ' + sessionStorage.getItem('token'),'X-CSRFToken': token } 
+               })
+                .then(function (response) {
+                return response.json();
+                })
+                .then(function (jsonResponse) {
+                self.year=jsonResponse.year;
+                self.model=jsonResponse.model;
+                self.make=jsonResponse.make;
+                self.description=jsonResponse.description;
+                self.colour=jsonResponse.colour;
+                self.transmission=jsonResponse.transmission;
+                self.photo=jsonResponse.photo;
+                self.car_type=jsonResponse.car_type;
+                self.price=jsonResponse.price;
+                console.log(jsonResponse);
+                
+                
+                })
+                .catch(function (error) {
+                //this.errormessage = "Something went wrong"
+                console.log(error);
+                });
+
+            },
+
+        },
+        
+    };
+    
+
+
+
+
+
+
 // Define Routes
 const routes = [
     { path: "/", component: Home },
     { path: "/register" , component: RegisterForm},
     { path: "/login" , component: LoginForm},
     { path: "/cars/new" , component: CarForm},
+    { path: "/explore" , component: Explore},
+    { path: "/cars/:car_id" , component: CarInfo,props:true},
+    { path: "/logout" , component: Logout},
+   
 
 
     

@@ -9,7 +9,7 @@ from flask import Flask
 from app import app, db, login_manager
 from flask import render_template, request, redirect, url_for, flash,send_from_directory,jsonify, session, abort, g, make_response
 from flask_login import login_user, logout_user, current_user, login_required
-from app.forms import LoginForm,RegisterForm,CarForm
+from app.forms import LoginForm,RegisterForm,CarForm,SearchForm
 from app.models import Users,Cars,Favourites
 from app.config import *
 from werkzeug.utils import secure_filename
@@ -18,6 +18,7 @@ import jwt
 from flask import _request_ctx_stack
 from functools import wraps
 import datetime
+
 
 # Create a JWT @requires_auth decorator
 # This decorator can be used to denote that a specific route should check
@@ -91,6 +92,7 @@ def login():
             if user is not None and check_password_hash(user.password, password):
                 payload = { 'username': user.username,'userid': user.id}
                 token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+                session['userid'] = user.id
                 jsonmsg=jsonify(message=" Login Successful and Token was Generated",data={"token":token})         
                 return jsonmsg 
             else: 
@@ -105,6 +107,7 @@ def login():
 def logout():
     user = g.current_user
     return jsonify(data={"user": user}, message="Logged Out")
+    #session.pop('userid',None)
 
 
 # user_loader callback. This callback is used to reload the user object from
@@ -135,15 +138,18 @@ def register():
                 return jsonmsg
         else:
             err=form_errors(form)
-            for er in err:
-                jsonErr=jsonify(errors=err)
+            
+            jsonErr=jsonify(errors=err)
             return jsonErr
 
-@app.route('/api/cars', methods=['POST'])
+
+@app.route('/api/cars', methods=['POST','GET'])
+@requires_auth
 def car():
     # Instantiate your form class
     form=CarForm()
     # Validate file upload on submit
+    
     if request.method == 'POST':
         if form.validate_on_submit():
         # Get file data and save to your uploads folder
@@ -158,7 +164,7 @@ def car():
             desc=request.form['description']
             pic=request.files['pic'] # or form.pic.data
             filename=secure_filename(pic.filename)
-            car=Cars(make=make,model=model,colour=colour, year=year, transmission=trans,car_type=cartype,price=price,description=desc,photo=filename,user_id=1)
+            car=Cars(make=make,model=model,colour=colour, year=year, transmission=trans,car_type=cartype,price=price,description=desc,photo=filename,user_id=g.current_user["userid"])
             #car=Cars(description=desc, make=make, model=model, colour=colour, year=year, transmission=trans, car_type=cartype, price=price, photo=pic, user_id=current_user.user_id )
             if car is not None:
                 db.session.add(car)
@@ -168,9 +174,110 @@ def car():
                 return jsonmsg
         else:
             err=form_errors(form)
-            for er in err:
-                jsonErr=jsonify(errors=err)
+            jsonErr=jsonify(errors=err)
             return jsonErr
+            
+    if request.method == 'GET':
+        allc=[]
+        cars=Cars.query.order_by(Cars.id).all()
+        for c in cars:
+            car={}
+            car['id']=c.id
+            car["user_id"]=c.user_id
+            car["year"]=c.year        
+            car["price"]=c.price
+            car["photo"]=c.photo
+            car["make"]=c.make
+            car["model"]=c.model
+            allc.append(car)
+        return jsonify(allcars=allc,test=g.current_user["userid"])
+        
+@app.route('/api/cars/<car_id>', methods=['GET'])
+@requires_auth
+def car_details(car_id):       
+    if request.method == 'GET':
+        c=Cars.query.filter_by(id=car_id).first()
+        return jsonify(id=c.id,model=c.model,make=c.make,user_id=c.user_id,car_type=c.car_type,
+            description=c.description,price=c.price,photo=c.photo,
+            transmission=c.transmission,colour=c.colour,year=c.year)
+        
+@app.route('/api/cars/<car_id>/favourite', methods=['POST'])
+@requires_auth
+def favourite_car(car_id):       
+    if request.method == 'POST':
+        userid=g.current_user['userid']
+        fav=Favourites(car_id,userid)
+        db.session.add(fav)
+        db.session.commit()
+        return jsonify(message="Car Favourited")
+    
+@app.route('/api/users/<user_id>', methods=['GET'])
+@requires_auth
+def user_details(user_id):       
+    if request.method == 'GET':
+        u=Users.query.filter_by(id=user_id).first()
+        user={}
+        user['id']=u.id
+        user['username']=u.username
+        user['name']=u.name
+        user['email']=u.email
+        user["location"]=u.location
+        user["biography"]=u.biography        
+        user["photo"]=u.photo
+        user["date_joined"]=u.date_joined
+        return jsonify(user=user)
+
+@app.route('/api/users/<user_id>/favourites', methods=['GET'])
+@requires_auth
+def user_favourites(user_id):       
+    if request.method == 'GET':
+        favcars=[]
+        favs=Favourites.query.filter_by(user_id=user_id).all()
+        for f in favs:
+            c=Cars.query.filter_by(id=f.car_id).first()
+            car={}
+            car['id']=c.id
+            car["user_id"]=c.user_id
+            car["year"]=c.year        
+            car["price"]=c.price
+            car["photo"]=c.photo
+            car["make"]=c.make
+            car["model"]=c.model
+            favcars.append(car)
+        return jsonify(favcars=favcars)
+               
+# @app.route('/ap"%{}%".format(query)
+#         i/search',methods=["GET"])
+# def car_search.method=="GET":
+#         query=request.method=("GET":
+#         query= username):
+#     if request@requires_auth
+
+@app.route('/api/search',methods=["GET"])
+@requires_auth
+def car_search():
+    search=[]
+    if request.method=="GET":
+        make=request.args.get('searchbymake')
+        model=request.args.get('searchbymodel')
+        search_cars= Cars.query.filter((Cars.make.like(make)|Cars.model.like(model)))
+        for c in search_cars:
+            car={}
+            car['id']=c.id
+            car["user_id"]=c.user_id
+            car["year"]=c.year            
+            car["price"]=c.price
+            car["photo"]=c.photo
+            car["make"]=c.make
+            car["model"]=c.model
+            search.append(car)
+        return jsonify(searchedcars=search)
+            
+
+        
+        
+
+        
 
 
 @login_manager.user_loader

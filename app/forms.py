@@ -31,4 +31,7 @@ class CarForm(FlaskForm):
     description= TextAreaField('Description', validators=[DataRequired()])
     pic=FileField('Upload Photo',validators=[FileRequired(),FileAllowed(['jpg','png'],'Images only!')])
 
-
+class SearchForm(FlaskForm):
+    searchbymake = StringField('Make', validators=[InputRequired()])
+    searchbymodel = StringField('Model', validators=[InputRequired()])
+    
