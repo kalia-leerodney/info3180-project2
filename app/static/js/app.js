@@ -733,7 +733,7 @@ const CarInfo = {
                     }).then(function (jsonResponse) {
                         // display a success message
                         console.log(jsonResponse.message);
-                        router
+                        location.reload()
                     }).catch(function (error) {
                             console.log(error);
                         });

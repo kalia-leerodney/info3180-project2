@@ -273,7 +273,9 @@ def car_search():
 
         
         
-
+@login_manager.user_loader
+def load_user(id):
+    return Users.query.get(int(id))
         
 
 
