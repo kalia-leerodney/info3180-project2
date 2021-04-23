@@ -237,3 +237,64 @@ body {
 .carbtn{
 	padding-bottom: 20px;
 }
+
+/* EXPLORE PAGE */
+
+.explore-container{
+	margin: auto;
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+}
+
+.explore-card{
+	border: 2px solid ;
+    border-color: #E2E8F0;
+    border-radius: 5px;
+    box-shadow: 5px 7px 5px #dee1e4;
+    width: 700px;
+	padding: 10px 20px;
+	margin-bottom: 50px;
+}
+
+.explore-card button{
+	border-radius: 5px;
+    padding: 10px 195px;
+    text-decoration: none;
+    text-align: center;
+    margin: auto auto auto auto;
+    color: white;
+    text-transform: uppercase;
+	align-self: center;
+	display: flex;
+	justify-content: center;
+
+}
+
+.explore-btn{
+	padding-bottom: 20px;
+}
+
+.explore-card label{
+	color: rgb(65, 64, 64);
+	font-weight: bold;
+}
+
+.explore-card h2{
+	font-weight: bold;
+	padding-bottom: 20px;
+}
+
+li {
+	list-style-type: none;
+}
+
+.top-card{
+	display: flex;
+	justify-content: space-between;
+}
+
+.top-card p{
+	background-color: green;
+	color: white;
+}
