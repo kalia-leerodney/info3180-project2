@@ -554,42 +554,55 @@ const Explore = {
     },*/
 
     template:`
-    <div>
-    <h2> Explore </h2>
+    <div class = "explore-container">
+        <h2> Explore </h2>
+        
     
-   
-    <form v-on:submit.prevent="exploreSearch" method="GET" enctype="multipart/form-data" id="searchForm">
+        <form v-on:submit.prevent="exploreSearch" method="GET" enctype="multipart/form-data" id="searchForm">
+        <div class = "explore-card">
+            <div class="form-group">
 
-    <div class="form-group">
+            <div class = "form-row">
+                <div class = "col">
+                    <label> Make </label><br>
+                    <input type="text" class = "form-control" name="searchbymake" v-model="searchMake"><br>
+                </div>
 
-        <label> Make </label><br>
-        <input type="text" name="searchbymake" v-model="searchMake"><br>
+                <div class = "col">
+                    <label> Model </label><br>
+                    <input type="text" class = "form-control" name="searchbymodel" v-model="searchModel"><br>
+                </div>
+            
+            </div>
 
-        <label> Model </label><br>
-        <input type="text" name="searchbymodel" v-model="searchModel"><br>
+            <div class = "explore-btn">
+                <button class="btn btn-success" > Search </button>
+            </div>
+        </div>
+        </form>
+        
 
-       
+            <ul>
+                <li v-for="car in allcars">
+
+                <div class ="card" style="width:18rem">
+                    <img class="card-img-top" id="car_img" :src="'/static/uploads/'  + car.photo" alt="car img"> 
+                   <div class = "card-body">
+                        <div class = "top-card">
+                            <h5 class = "card-title">  {{car.year}}  </h5>
+                            <h5 class= "card-title">  {{car.make}}  </h5>
+                            <p>  {{car.price}}  </p>
+                        </div
+                        <p>  {{car.model}}  </p>
+                    </div>
+                    <button @click="carinfo(car.id)" class="btn btn-primary"> View More Details </button>
+                </div>
+                </li>
+
+            </ul>
+
+        
     </div>
-        <button class="btn btn-primary mb-2" > Search </button>
-    </form>
-    </div>
-
-    <ul>
-    <li v-for="car in allcars">
-
-    <img id="car_img" :src="'/static/uploads/' + car.photo" alt="car img"> 
-    <p>  {{car.year}}  </p>
-    <p>  {{car.price}}  </p>
-    <p>  {{car.model}}  </p>
-    <p>  {{car.make}}  </p>
-    <button @click="carinfo(car.id)"> View More Details </button>
-   
-
-    </li>
-
-    </ul>
-
-    
     `,
     data: function() {
         return {
