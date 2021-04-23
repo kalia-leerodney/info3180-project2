@@ -19,24 +19,22 @@ app.component('app-header', {
     
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <router-link class="nav-link" to="/">Home <span class="sr-only">(current)</span></router-link>
-          </li>
-          <li class="nav-item active">
-            <router-link class="nav-link" to="/register"> Register <span class="sr-only">(current)</span></router-link>
-          </li>
-          <li class="nav-item active">
-          <router-link class="nav-link" to="/cars/new"> Add Car <span class="sr-only">(current)</span></router-link>
-        </li>
-
-        <li class="nav-item active">
-          <router-link class="nav-link" to="/explore"> Explore <span class="sr-only">(current)</span></router-link>
-        </li>
-         
           <li v-if="!status_log" class="nav-item active">
             <router-link class="nav-link" to="/login">Login <span class="sr-only">(current)</span></router-link>
           </li>
-          <li v-else class="nav-item active">
+          <li  v-if="!status_log"class="nav-item active">
+            <router-link class="nav-link" to="/register"> Register <span class="sr-only">(current)</span></router-link>
+          </li>
+          <li  v-if="status_log" class="nav-item active">
+          <router-link class="nav-link" to="/cars/new"> Add Car <span class="sr-only">(current)</span></router-link>
+        </li>
+          <li v-if="status_log" class="nav-item active">
+          <router-link class="nav-link" to="/explore"> Explore <span class="sr-only">(current)</span></router-link>
+        </li>
+        <li v-if="status_log" class="nav-item active">
+        <router-link class="nav-link" @click="profile()" v-bind:to="'/users/' + c_user">My Profile <span class="sr-only">(current)</span></router-link>
+      </li>
+          <li v-if="status_log" class="nav-item active">
             <router-link class="nav-link" to="/logout">Logout <span class="sr-only">(current)</span></router-link>
           </li>
         </ul>
@@ -55,8 +53,9 @@ app.component('app-header', {
     },
 
     methods: {
-        profile: function(){ 
-            //this.$router.push("/users/"+userid)
+        profile: function(){
+            let self =this;
+            this.$router.push("/users/"+self.c_user)
             location.reload();
         }
     },
@@ -77,9 +76,7 @@ app.component('app-header', {
                 return response.json();
             }).then(function (response) {
                 let result = response.data;
-                //console.log("User ID retrieved");
-                self.c_user = result.user.id;
-                //return result.user.id;
+                self.c_user = result.user.userid;
             })
             .catch(function (error) {
                 console.log(error);
@@ -87,21 +84,21 @@ app.component('app-header', {
     }
 });
 
-app.component('app-footer', {
-    name: 'AppFooter',
-    template: `
-    <footer>
-        <div class="container">
-            <p>Copyright &copy; {{ year }} Flask Inc.</p>
-        </div>
-    </footer>
-    `,
-    data() {
-        return {
-            year: (new Date).getFullYear()
-        }
-    }
-});
+// app.component('app-footer', {
+//     name: 'AppFooter',
+//     template: `
+//     <footer>
+//         <div class="container">
+//             <p>Copyright &copy; {{ year }} Flask Inc.</p>
+//         </div>
+//     </footer>
+//     `,
+//     data() {
+//         return {
+//             year: (new Date).getFullYear()
+//         }
+//     }
+// });
 
 const Home = {
     name: 'Home',
@@ -141,43 +138,53 @@ const NotFound = {
 
 const LoginForm = {
     name: "login-form",
-    // data(){
-    //     return{
+     data(){
+         return{
     //         isSuccessUpload:false,
-    //         displayFlash:false,
+             displayFlash:false,
     //         successmessage:"",
-    //         errormessage:"",
+             errormessage:"",
             
-    //     }
-    // },
+         }
+     },
 
     template:`
     <div class = 'login-container'>
         <h2> Login to your account </h2>
+
+        <div class="alert alert-danger" v-if="isError">
+            <ul>
+                <li v-for="error in errors">{{ error }}</li>
+            </ul>
+        </div>
     
         <form v-on:submit.prevent="loginUser" method="POST" enctype="multipart/form-data" id="loginForm">
 
-        <div class="form-group">
+        <div class="card">
+            <div class = "form-group">
 
-            <label> Username </label><br>
-            <input type="text" name="username"><br>
+                <label> Username </label><br>
+                <input type="text" name="username" class="form-control"><br>
 
-            <label> Password </label><br>
-            <input type="password" name="password"><br>
-
-        </div>
-            <button class="btn btn-primary mb-2" > Login </button>
+                <label> Password </label><br>
+                <input type="password" name="password" class="form-control"><br>
+                <button class="btn btn-success" > Login </button>
+            </div>
+                
+            </div> 
         </form>
     </div>
     
     `,data: function() {
         return {
-            messages: '',
-            token: ''
+            token: '',
+            errors:[],
+            isError: false
         }
      },
     methods: {
         loginUser(){
+            let self = this;
             let loginForm = document.getElementById('loginForm');
             let form_data = new FormData(loginForm);
             fetch("/api/auth/login", {
@@ -192,15 +199,28 @@ const LoginForm = {
                 return response.json();
                 })
                 .then(function (jsonResponse) {
-                console.log(jsonResponse);
-                self.messages = jsonResponse;
-                let tkn_jwt = jsonResponse.data.token;
-                sessionStorage.setItem('token', tkn_jwt);
-                console.info('Token stored in sessionStorage.');
-                self.token = tkn_jwt;
-                alert("Logged In!")
-                router.push("/cars/new")
-                /*location.reload()*/
+                    console.log(jsonResponse)
+                    
+                if (typeof jsonResponse.data === 'undefined'){
+                    console.log(jsonResponse.message);
+                    self.isError=true;
+                    //self.isSuccess=false;
+                    self.errors = [jsonResponse.message];
+                    
+                }
+                if (jsonResponse.errors) {
+                    self.isError=true;
+                    self.isSuccess=false;
+                    self.errors = jsonResponse.errors;
+                }
+                else{
+                        console.log(jsonResponse.message);
+                        let tkn_jwt = jsonResponse.data.token;
+                        sessionStorage.setItem('token', tkn_jwt);
+                        console.info('Token stored in sessionStorage.');
+                        self.token = tkn_jwt;
+                        router.push("/explore")}
+                
                 })
                 .catch(function (error) {
                 console.log(error);
@@ -222,7 +242,7 @@ const Logout = {
     methods: {
         logOut: function () {
             let self = this;
-            fetch("/api/auth/logout", { method: 'GET', headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('token') }})
+            fetch("/api/auth/logout", { method: 'POST', headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('token'),'X-CSRFToken': token}})
                 .then(function (response) {
                     return response.json();
                 })
@@ -232,7 +252,7 @@ const Logout = {
                     sessionStorage.removeItem('token');
                     console.info('Token removed from sessionStorage.');
                     router.push("/")
-                    location.reload()
+                    
                 })
                 .catch(function (error) {
                     console.log(error);
@@ -250,54 +270,89 @@ const Logout = {
 
 const RegisterForm = {
     name: "register-form",
-    // data(){
-    //     return{
-    //         isSuccessUpload:false,
-    //         displayFlash:false,
-    //         successmessage:"",
-    //         errormessage:"",      
-    //     }
-    // },
+     data(){
+         return{
+            isSuccessUpload:false,
+            displayFlash:false,
+            successmessage:"",
+             errormessage:"",      
+         }
+     },
 
     template:`
-    <div>
-    <h2> Register New User </h2>
-   
-    <form v-on:submit.prevent="registerUser" method="POST" enctype="multipart/form-data" id="registerForm">
+    <div class='register-container'>
+        <h2> Register New User </h2>
 
-    <div class="form-group">
-
-        <label> Username </label><br>
-        <input type="text" name="username"><br>
-
-        <label> Password </label><br>
-        <input type="text" name="password"><br>
-
-        <label> Fullname </label><br>
-        <input type="text" name="fullname"><br>
-  
-        <label> Email </label><br>
-        <input type="text" name="email"><br>
-
-        <label> Location </label><br>
-        <input type="text" name="location"><br>
-
-
-        <label> Biography </label><br>
-        <textarea name="bio"> </textarea><br>
-
-        <label> Upload Photo: </label><br>
-        <input type="file" name="pic">
-
-    </div>
-        <button class="btn btn-primary mb-2" > Register </button>
-    </form>
-    </div>
+        <div class="alert alert-success" v-if="isSuccess">
+            <p v-for="success in successMessage">{{ success }}</p>
+        </div>
     
+        <div class="alert alert-danger" v-if="isError">
+            <ul>
+                <li v-for="error in errors">{{ error }}</li>
+            </ul>
+        </div>
+    
+        <form v-on:submit.prevent="registerUser" method="POST" enctype="multipart/form-data" id="registerForm">
+        
+            <div class= "regcard">
+                <div class="form-group">
+
+                    <div class = "form-row">
+                        <div class = "col">
+                            <label> Username </label><br>
+                            <input type="text" class="form-control" name="username"><br>
+                        </div>
+
+                        <div class = "col">
+                            <label> Password </label><br>
+                            <input type="text" class="form-control" name="password"><br>
+                        </div>
+                    </div>
+
+                    <div class = "form-row">
+                        <div class = "col">
+                            <label> Fullname </label><br>
+                            <input type="text" class="form-control" name="fullname"><br>
+                        </div>
+
+                        <div class = "col">
+                            <label> Email </label><br>
+                            <input type="text" class="form-control" name="email"><br>
+                        </div>
+                    </div>
+
+                    <label> Location </label><br>
+                    <input type="text" class="form-control" name="location"><br>
+
+
+                    <label> Biography </label><br>
+                    <textarea name="bio" class="form-control" > </textarea><br>
+
+                    <label> Upload Photo: </label><br>
+                    <input type="file" name="pic" class="form-control-file" placeholder="Browse">
+
+                </div>
+            <div class="regbtn">
+                <button class="btn btn-success" > Register </button>
+            </div>
+        
+        </form>
+    </div>
+
     `,
+    data: function() {
+        return{
+            errors: [],
+            successMessage: [],
+            isSuccess: false,
+            isError: false
+        };
+    },
 
     methods: {
         registerUser(){
+            let self = this;
             let registerForm = document.getElementById('registerForm');
             let form_data = new FormData(registerForm);
             fetch("/api/register", {
@@ -312,11 +367,19 @@ const RegisterForm = {
                 return response.json();
                 })
                 .then(function (jsonResponse) {
-                //isSuccessUpload = true
-                //this.successmessage = "File Uploaded Successfully"
-                // display a success message
                 console.log(jsonResponse);
+                if (jsonResponse.errors) {
+                        self.isError=true;
+                        self.isSuccess=false;
+                        self.errors = jsonResponse.errors;
+                    }
+                    else if (jsonResponse.jsonmsg) {
+                        self.isError = false;
+                        self.isSuccess = true;
+                        self.successMessage = jsonResponse.jsonmsg;
+                    }
                 })
+                
                 .catch(function (error) {
                 //this.errormessage = "Something went wrong"
                 console.log(error);
@@ -330,73 +393,112 @@ const RegisterForm = {
 
 const CarForm = {
     name: "car-form",
-    // data(){
-    //     return{
-    //         isSuccessUpload:false,
-    //         displayFlash:false,
-    //         successmessage:"",
-    //         errormessage:"",      
-    //     }
-    // },
+        data(){
+         return{
+            isSuccessUpload:false,
+            displayFlash:false,
+            successmessage:"",
+            errormessage:"",      
+        }
+     },
 
-    template:`
-    <div>
-    <h2> Add New Car </h2>
-   
-   
-    <form v-on:submit.prevent="registerCar" method="POST" enctype="multipart/form-data" id="carForm">
+     template:`
+     <div class = 'addcar-container'>
+         <h2> Add New Car </h2>
+ 
+         <div class="alert alert-success" v-if="isSuccess">
+                 <p v-for="success in successMessage">{{ success }}</p>
+         </div>
+ 
+         <div class="alert alert-danger" v-if="isError">
+                 <ul>
+                     <li v-for="error in errors">{{ error }}</li>
+                 </ul>
+         </div>
+     
+     
+         <form v-on:submit.prevent="registerCar" method="POST" enctype="multipart/form-data" id="carForm">
+         <div class = "addcar-card">
+             <div class="form-group">
+ 
+                 <div class = "form-row">
+                     <div class = "col">
+                         <label> Make </label><br>
+                         <input type="text" class="form-control" name="make"><br>
+                     </div>
+ 
+                     <div class = "col">
+                         <label> Model </label><br>
+                         <input type="text" class="form-control" name="model"><br>
+                     </div>
+                 </div>
+ 
+                 <div class = "form-row">
+                     <div class = "col">
+                         <label> Colour </label><br>
+                         <input type="text" class="form-control" name="colour"><br>
+                     </div>
+ 
+                     <div class = "col">
+                         <label> Year </label><br>
+                         <input type="text" class="form-control" name="year"><br>
+                     </div>
+                 </div>
+ 
+                 <label> Price </label><br>
+                 <input type="text" class="form-control" name="price"><br>
+ 
+                 <div class = "form-row">
+                     <div class="col">
+                         <label> Car Type </label><br>
+                         <select name="cartype" class="form-control"> 
+                             <option value="SUV"> SUV </option>
+                             <option value="Sports Car"> Sports Car </option>
+                             <option value="Sedan"> Sedan </option>
+                             <option value="Coupe"> Coupe </option>
+                         </select><br>
+                     </div>
+ 
+             
+                     <div class = "col">
+                         <label> Transmission </label><br>
+                         <select name="transmission" class="form-control"> 
+                             <option value=Automatic> Automatic </option>
+                             <option value=Manual> Manual </option>
+ 
+                         </select><br>
+                     </div>
+                 </div>
+ 
+                 <label> Description </label><br>
+                 <textarea name="description" class="form-control"> </textarea><br>
+ 
+                 <label> Upload Photo: </label><br>
+                 <input type="file" name="pic">
+ 
+             </div>
+             <div class = "carbtn">
+                 <button class="btn btn-success" > Save </button>
+             </div>
+         </div>
+         </form>
+     </div>
+     
+     `,
 
-    <div class="form-group">
+    data: function() {
+        return{
+            errors: [],
+            successMessage: [],
+            isSuccess: false,
+            isError: false
+        };
+    },
 
-        <label> Make </label><br>
-        <input type="text" name="make"><br>
-
-        <label> Model </label><br>
-        <input type="text" name="model"><br>
-
-        <label> Colour </label><br>
-        <input type="text" name="colour"><br>
-  
-        <label> Year </label><br>
-        <input type="text" name="year"><br>
-
-        <label> Price </label><br>
-        <input type="text" name="price"><br>
-
-
-        <label> Car Type </label><br>
-        <select name="cartype"> 
-        <option value="SUV"> SUV </option>
-        <option value="Sports Car"> Sports Car </option>
-        <option value="Sedan"> Sedan </option>
-        <option value="Coupe"> Coupe </option>
-        </select><br>
-
-       
-
-        <label> Transmission </label><br>
-        <select name="transmission"> 
-        <option value=Automatic> Automatic </option>
-        <option value=Manual> Manual </option>
-
-        </select><br>
-
-
-        <label> Description </label><br>
-        <textarea name="description"> </textarea><br>
-
-        <label> Upload Photo: </label><br>
-        <input type="file" name="pic">
-
-    </div>
-        <button class="btn btn-primary mb-2" > Save </button>
-    </form>
-    </div>
-    
-    `,
 
     methods: {
         registerCar(){
+            let self = this;
             let carForm = document.getElementById('carForm');
             let form_data = new FormData(carForm);
             fetch("/api/cars", {
@@ -416,6 +518,18 @@ const CarForm = {
                 //this.successmessage = "File Uploaded Successfully"
                 // display a success message
                 console.log(jsonResponse);
+
+                if (jsonResponse.errors) {
+                    self.isError=true;
+                    self.isSuccess=false;
+                    self.errors = jsonResponse.errors;
+                }
+                else if (jsonResponse.jsonmsg) {
+                    self.isError = false;
+                    self.isSuccess = true;
+                    self.successMessage = jsonResponse.jsonmsg;
+                    //alert("Success")
+                }
                 })
                 .catch(function (error) {
                 //this.errormessage = "Something went wrong"
@@ -517,8 +631,7 @@ const Explore = {
                                 // display a success message
                                 self.allcars=jsonResponse.allcars.slice(-3);
                                 console.log(jsonResponse.allcars.slice(-3));
-                                console.log(jsonResponse.test);
-                                //console.log(jsonResponse.allcars);
+                                console.log(jsonResponse.allcars);
                                 
                             })
                             .catch(function (error) {
@@ -553,8 +666,10 @@ const CarInfo = {
     <img id="car_img" :src="'/static/uploads/' + photo" alt="car img"> 
 
     <button class="btn btn-primary mb-2" > Email Owner </button>
-    <button class="btn btn-primary mb-2" > Favourites </button>
 
+    <button v-if="faved" class="btn btn-primary mb-2" >  Already Favourited </button>
+    <button v-else" @click="favouritecar(car_id)" class="btn btn-primary mb-2" > Favourite </button>
+    
     </div>
     
     `,
@@ -569,7 +684,8 @@ const CarInfo = {
             transmission:"",
             make:"",
             car_type:"",
-            photo:""
+            photo:"",
+            faved:false
 
             
 
@@ -599,6 +715,7 @@ const CarInfo = {
                 self.photo=jsonResponse.photo;
                 self.car_type=jsonResponse.car_type;
                 self.price=jsonResponse.price;
+                self.faved=jsonResponse.Faved;
                 console.log(jsonResponse);
                 
                 
@@ -609,10 +726,115 @@ const CarInfo = {
                 });
 
             },
+            favouritecar: function(car_id){
+                fetch("/api/cars/" + car_id + "/favourite", { method: 'POST', headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('token'), 'X-CSRFToken': token }, credentials: 'same-origin'})
+                .then(function (response) {
+                    return response.json();
+                    }).then(function (jsonResponse) {
+                        // display a success message
+                        console.log(jsonResponse.message);
+                        router
+                    }).catch(function (error) {
+                            console.log(error);
+                        });
+            },
+
 
         },
         
     };
+
+    const UserInfo = {
+        name: "userinfo",
+        props: ['user_id'],
+        template: `
+    
+        <div>
+        <h2>  {{user.name}} </h2>  <br> 
+        <h4> @{{user.username}} </h4>  
+        <p> {{user.biography}} </p> <br>
+        <p> Email </p> <p> {{user.email}} </p> <br>
+        <p> Location </p> <p> {{user.location}} </p> <br>
+        <p> Date Joined </p> <p> {{user.date_joined}} </p> <br>
+
+       
+        
+        <img id="user_img" :src="'/static/uploads/' + user.photo" alt="user img"> 
+        <h2> Cars Favourited </h2>
+
+        
+        <ul>
+    <li v-for="car in allcars">
+
+    <img id="car_img" :src="'/static/uploads/' + car.photo" alt="car img"> 
+    <p>  {{car.year}}  </p>
+    <p>  {{car.price}}  </p>
+    <p>  {{car.model}}  </p>
+    <p>  {{car.make}}  </p>
+    <button @click="carinfo(car.id)"> View More Details </button>
+   
+
+    </li>
+
+    </ul>
+
+    
+        </div>
+        `,
+        data: function() {
+            return {
+                allcars: [],
+                user:{}
+            }
+         },created: function(){
+            let self = this;
+            this.viewUserinfo(self.user_id);
+            this.carsfavourited(self.user_id);
+        },
+    
+        methods: {
+            viewUserinfo(user_id){
+                let self = this;
+                fetch('/api/users/' + user_id, {
+                    method: 'GET',
+                    headers:{ 'Authorization': 'Bearer ' + sessionStorage.getItem('token'),'X-CSRFToken': token } 
+                   })
+                    .then(function (response) {
+                    return response.json();
+                    })
+                    .then(function (jsonResponse) {
+                    self.user=jsonResponse.user;
+                    })
+                    .catch(function (error) {
+                    //this.errormessage = "Something went wrong"
+                    console.log(error);
+                    });
+    
+                },
+                carsfavourited: function(user_id){
+                    let self = this;
+                    fetch("/api/users/" + user_id + "/favourites", { method: 'GET', headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('token'), 'X-CSRFToken': token }, credentials: 'same-origin'})
+                    .then(function (response) {
+                        return response.json();
+                        }).then(function (jsonResponse) {
+                            // display a success message
+                            self.allcars=jsonResponse.favouritecars
+                            console.log(jsonResponse);
+                        }).catch(function (error) {
+                                console.log(error);
+                            });
+                },
+                carinfo: function(car_id){ 
+                    this.$router.push("/cars/"+car_id)
+                   
+                },
+    
+    
+            },
+            
+        };
+        
+    
     
 
 
@@ -629,6 +851,7 @@ const routes = [
     { path: "/explore" , component: Explore},
     { path: "/cars/:car_id" , component: CarInfo,props:true},
     { path: "/logout" , component: Logout},
+    { path: "/users/:user_id" , component: UserInfo,props:true},
    
 
 

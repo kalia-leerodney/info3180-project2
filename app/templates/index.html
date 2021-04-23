@@ -2,7 +2,7 @@
 
 {% block main %}
 <div id="app">
-    <app-header></app-header>
+    <app-header :key="$route.fullPath" ></app-header>
 
     <main>
         <div class="container">

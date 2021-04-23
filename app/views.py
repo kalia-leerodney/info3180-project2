@@ -82,12 +82,9 @@ def index(path):
 def login():
     form = LoginForm()
     if request.method == "POST":
-        form.username.data = request.form['username']
-        form.password.data = request.form['password']
-        
         if form.validate_on_submit():
-            username = form.username.data
-            password = form.password.data
+            username = request.form['username']
+            password = request.form['password']
             user = Users.query.filter_by(username=username).first()
             if user is not None and check_password_hash(user.password, password):
                 payload = { 'username': user.username,'userid': user.id}
@@ -102,7 +99,7 @@ def login():
             jsonErr=jsonify(errors=err)
             return jsonErr
 
-@app.route('/api/auth/logout', methods=['GET'])
+@app.route('/api/auth/logout', methods=['POST'])
 @requires_auth
 def logout():
     user = g.current_user
@@ -134,13 +131,10 @@ def register():
                 db.session.add(acc)
                 db.session.commit()
                 pic.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                jsonmsg=jsonify(message="Successful",username=username,password=password,fullname=fullname, email=email, location=location, biography=bio,photo=filename,date_joined=dt)        
-                return jsonmsg
+                jsonmsg={'message': 'User added Successful',}  
+                return jsonify(jsonmsg=jsonmsg)
         else:
-            err=form_errors(form)
-            
-            jsonErr=jsonify(errors=err)
-            return jsonErr
+            return jsonify(errors=form_errors(form))
 
 
 @app.route('/api/cars', methods=['POST','GET'])
@@ -170,12 +164,10 @@ def car():
                 db.session.add(car)
                 db.session.commit()
                 pic.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                jsonmsg=jsonify(message="Successful")         
-                return jsonmsg
+                jsonmsg={'message': 'Car added Successful'}  
+                return jsonify(jsonmsg=jsonmsg)
         else:
-            err=form_errors(form)
-            jsonErr=jsonify(errors=err)
-            return jsonErr
+            return jsonify(errors=form_errors(form))
             
     if request.method == 'GET':
         allc=[]
@@ -190,16 +182,20 @@ def car():
             car["make"]=c.make
             car["model"]=c.model
             allc.append(car)
-        return jsonify(allcars=allc,test=g.current_user["userid"])
+        return jsonify(allcars=allc)
         
 @app.route('/api/cars/<car_id>', methods=['GET'])
 @requires_auth
 def car_details(car_id):       
     if request.method == 'GET':
+        f=False
         c=Cars.query.filter_by(id=car_id).first()
+        favs=Favourites.query.filter((Favourites.car_id==car_id) & (Favourites.user_id==g.current_user["userid"])).first()
+        if favs!=None:
+            f=True
         return jsonify(id=c.id,model=c.model,make=c.make,user_id=c.user_id,car_type=c.car_type,
             description=c.description,price=c.price,photo=c.photo,
-            transmission=c.transmission,colour=c.colour,year=c.year)
+            transmission=c.transmission,colour=c.colour,year=c.year,Faved=f)
         
 @app.route('/api/cars/<car_id>/favourite', methods=['POST'])
 @requires_auth
@@ -229,9 +225,10 @@ def user_details(user_id):
 
 @app.route('/api/users/<user_id>/favourites', methods=['GET'])
 @requires_auth
-def user_favourites(user_id):       
+def user_favourites(user_id): 
+    favcars=[]      
     if request.method == 'GET':
-        favcars=[]
+        
         favs=Favourites.query.filter_by(user_id=user_id).all()
         for f in favs:
             c=Cars.query.filter_by(id=f.car_id).first()
@@ -244,7 +241,7 @@ def user_favourites(user_id):
             car["make"]=c.make
             car["model"]=c.model
             favcars.append(car)
-        return jsonify(favcars=favcars)
+        return jsonify(favouritecars=favcars)
                
 # @app.route('/ap"%{}%".format(query)
 #         i/search',methods=["GET"])
@@ -280,9 +277,6 @@ def car_search():
         
 
 
-@login_manager.user_loader
-def load_user(id):
-    return Users.query.get(int(id))
 
 ###
 # The functions below should be applicable to all Flask apps.
