@@ -220,7 +220,8 @@ def user_details(user_id):
         user["location"]=u.location
         user["biography"]=u.biography        
         user["photo"]=u.photo
-        user["date_joined"]=u.date_joined
+        date_time=u.date_joined
+        user["date_joined"]=date_time.strftime("%B %d, %Y")
         return jsonify(user=user)
 
 @app.route('/api/users/<user_id>/favourites', methods=['GET'])
