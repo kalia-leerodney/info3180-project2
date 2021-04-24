@@ -287,11 +287,21 @@ body {
 	padding-bottom: 20px;
 }
 
-li {
+.car_Card{
 	list-style-type: none;
 	display: inline-block;
     vertical-align: top;
 }
+.explorelist{
+	margin-left: 85px;
+}
+li{
+	list-style-type: none;
+	display: inline-block;
+    vertical-align: top;
+	
+}
+
 
 
 /* CAR INFO */
@@ -319,11 +329,15 @@ li {
     width: 50px;
 	padding: 10px 20px;
 	margin-bottom: 50px;
+	
+	
 }
 
 .details-card-group{
 	display: flex;
 	align-items: flex-start;
+	
+	
 }
 
 .card-deck{
@@ -364,6 +378,7 @@ li {
 	color: rgb(119, 118, 118);
 	font-weight: 700;
 }
+
 
 .carinfobtns{
 	justify-content: space-between;
@@ -419,3 +434,55 @@ li {
 .user-container h2{
 	padding: 20px;
 }
+
+.user-at{
+	padding-left: 10px;
+}
+.navbar-default .navbar-brand {
+    color: #777;
+}
+
+.user-card-body{
+	padding-left: 20px;
+}
+
+.user-name{
+	display: flex;
+	flex-direction: row;
+	font-size: xx-large;
+	margin-bottom: 0px;
+	padding-bottom: 0px;
+	
+
+}
+.card-at{
+	padding-top: 0px;
+	margin-top:0px;
+	font-size: x-large;
+	color:#73787c;
+}
+.navbar-default {
+    background-color: #F8F8F8;
+    border-color: #E7E7E7;
+}
+.price{
+	padding:5px;
+	display:flex;
+	background-color:#18b683;
+	border-radius: 10px;
+	color: white;
+}
+#price-tag{
+	margin-right:5px;
+}
+
+.f_cars_lbl{
+	text-align: left;
+	
+}
+.card-info{
+	color:black;
+	margin-left:5px;
+	font-weight: 485;
+}
+

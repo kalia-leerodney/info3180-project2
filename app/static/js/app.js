@@ -11,7 +11,7 @@ const app = Vue.createApp({
 app.component('app-header', {
     name: 'AppHeader',
     template: `
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
       <a class="navbar-brand" href="#">United Auto Sales</a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -584,31 +584,32 @@ const Explore = {
             </div>
             </form>
             </div>
-
+            <ul class="explorelist">    
             <li v-for="car in allcars">
                 
-                    <div class = "card-group">
-                        <div class ="details-card" style="width: 18rem;">
+                    <div class = "details-card-group">
+                        <div class ="details-card" style="width: 20rem;">
                             <img class="card-img-top" id="car_img" :src="'/static/uploads/'  + car.photo" alt="car img"> 
                                 <div class = "card-body">
                                     <div class = "top-card">
                                         <h5 class = "card-title">  {{car.year}}  </h5>
                                         <h5 class= "card-title">  {{car.make}}  </h5>
-                                        <img id = "price-tag" src = "/static/price-tag.png">
-                                        <p class="card-text">  {{car.price}}  </p>
+                                        <div class="price">
+                                   <img id = "price-tag" src = "/static/price-tag.png">
+                                   <p class="card-text">  {{car.price}}  </p>
+                                </div>
                                     </div>
                                     <p class="card-text">  {{car.model}}  </p>
                                 </div>    
                             
-                            <button @click="carinfo(car.id)" class="btn btn-primary"> View More Details </button>
+                            <button @click="carinfo(car.id)" class="btn btn-primary btn-block"> View More Details </button>
                         </div>
                     </div>
                 
 
             </li>
-
-            
-        
+            </ul>
+             
     </div>
     
     `,
@@ -685,8 +686,7 @@ const CarInfo = {
 
                 <div class = "card-body">
                     <div class = "yearmake">
-                            <h2 class = "card-title">  {{ year }} </h2> <br> 
-                            <h2 class = "card-title"> {{ make }} </h2> 
+                            <h2 class = "card-title">  {{ year }}  {{ make }} </h2> <br> 
                     </div>
 
                     <p class="model"> {{model}} </p>  
@@ -724,7 +724,9 @@ const CarInfo = {
                         <button v-if="faved" type="button" class="btn btn-default btn-circle">
                             <img src="/static/heart.png"> 
                         </button>
-                        <button v-else" @click="favouritecar(car_id)" type = "button" class="btn btn-primary" > Favourite </button>
+                        <button v-else" @click="favouritecar(car_id)" type = "button" class="btn btn-default btn-circle" >  
+                            <img src="/static/outline.png"> 
+                        </button>
                     </div>
                 </div>
             </div>
@@ -815,26 +817,28 @@ const CarInfo = {
                     <img id="user_img" :src="'/static/uploads/' + user.photo" alt="user img" class = "card-img-left"> 
                 </div>
 
-                <div class="card-body">
-                    <h2 class = "card-title">  {{user.name}} </h2>  <br> 
-                    <h4 class = "card-text"> @{{user.username}} </h4>  
+                <div class="user-card-body">
+                    <div class="form-col">
+                    <p class = "user-name">{{user.name}}</p>   
+                    <p class = "card-at"> @{{user.username}} </p> 
+                    </div> 
                     <p class = "card-text"> {{user.biography}} </p> <br>
                 
-                    <div class = "form-row">
+                    <div class = "form-col">
 
-                        <div class = "col">
-                            <label>Email</label>
-                            <p class="card-text"> {{user.email}} </p> <br>
+                        <div class = "row">
+                            <p class = "card-text">Email:</p>
+                            <p class="card-info"> {{user.email}} </p> <br>
                         </div>
 
-                        <div class = "col">
-                            <label>Location</label>
-                            <p class="card-text"> {{user.location}} </p> <br>
+                        <div class = "row">
+                            <p class = "card-text">Location:</p>
+                            <p class="card-info"> {{user.location}} </p> <br>
                         </div>
 
-                        <div class = "col">
-                            <label>Joined</label>
-                            <p class="card-text"> {{user.date_joined}} </p> <br>
+                        <div class = "row">
+                            <p class = "card-text">Joined:</p>
+                            <p class="card-info"> {{user.date_joined}} </p> <br>
                         </div>
 
                     </div>
@@ -842,25 +846,27 @@ const CarInfo = {
             </div>
        
         
-        <h2> Cars Favourited </h2>
+        <h2 class="f_cars_lbl"> Cars Favourited </h2>
 
         
     <ul>
-        <li v-for="car in allcars">
+ 
+        <li v-for="car in allcars" class="car_Card">
             <div class = "details-card-group">
-                <div class ="details-card" style="width: 18rem;">
+                <div class ="details-card" style="width: 22rem;">
                     <img class="card-img-top" id="car_img" :src="'/static/uploads/'  + car.photo" alt="car img"> 
                         <div class = "card-body">
                             <div class = "top-card">
                                 <h5 class = "card-title">  {{car.year}}  </h5>
                                 <h5 class= "card-title">  {{car.make}}  </h5>
-                                <img id = "price-tag" src = "/static/price-tag.png">
-                                <p class="card-text">  {{car.price}}  </p>
+                                <div class="price">
+                                <img id = "price-tag" src = "/static/price-tag.png"><p class="card-text">  {{car.price}}  </p>
+                                </div>
                             </div>
                             <p class="card-text">  {{car.model}}  </p>
                         </div>    
-                    
-                    <button @click="carinfo(car.id)" class="btn btn-primary"> View More Details </button>
+                   
+                    <button @click="carinfo(car.id)" class="btn btn-primary btn-block"> View More Details </button>
                 </div>
             </div>
         </li>
