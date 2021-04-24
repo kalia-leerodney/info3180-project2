@@ -554,55 +554,63 @@ const Explore = {
     },*/
 
     template:`
-    <div class = "explore-container">
-        <h2> Explore </h2>
-        
-    
-        <form v-on:submit.prevent="exploreSearch" method="GET" enctype="multipart/form-data" id="searchForm">
-        <div class = "explore-card">
-            <div class="form-group">
-
-            <div class = "form-row">
-                <div class = "col">
-                    <label> Make </label><br>
-                    <input type="text" class = "form-control" name="searchbymake" v-model="searchMake"><br>
-                </div>
-
-                <div class = "col">
-                    <label> Model </label><br>
-                    <input type="text" class = "form-control" name="searchbymodel" v-model="searchModel"><br>
-                </div>
+    <div>
+        <div class = "explore-container">
+            <h2> Explore </h2>
             
-            </div>
-
-            <div class = "explore-btn">
-                <button class="btn btn-success" > Search </button>
-            </div>
-        </div>
-        </form>
         
+            <form v-on:submit.prevent="exploreSearch" method="GET" enctype="multipart/form-data" id="searchForm">
+            <div class = "explore-card">
+                <div class="form-group">
 
-            <ul>
-                <li v-for="car in allcars">
+                    <div class = "form-row">
+                        <div class = "col">
+                            <label> Make </label><br>
+                            <input type="text" class = "form-control" name="searchbymake" v-model="searchMake"><br>
+                        </div>
 
-                <div class ="card" style="width:18rem">
-                    <img class="card-img-top" id="car_img" :src="'/static/uploads/'  + car.photo" alt="car img"> 
-                   <div class = "card-body">
-                        <div class = "top-card">
-                            <h5 class = "card-title">  {{car.year}}  </h5>
-                            <h5 class= "card-title">  {{car.make}}  </h5>
-                            <p>  {{car.price}}  </p>
-                        </div
-                        <p>  {{car.model}}  </p>
+                        <div class = "col">
+                            <label> Model </label><br>
+                            <input type="text" class = "form-control" name="searchbymodel" v-model="searchModel"><br>
+                        </div>
+                    
                     </div>
-                    <button @click="carinfo(car.id)" class="btn btn-primary"> View More Details </button>
+
+                    <div class = "explore-btn">
+                        <button class="btn btn-success" > Search </button>
+                    </div>
+                    
                 </div>
-                </li>
+            </div>
+            </form>
+            </div>
 
-            </ul>
+            <li v-for="car in allcars">
+                
+                    <div class = "card-group">
+                        <div class ="details-card" style="width: 18rem;">
+                            <img class="card-img-top" id="car_img" :src="'/static/uploads/'  + car.photo" alt="car img"> 
+                                <div class = "card-body">
+                                    <div class = "top-card">
+                                        <h5 class = "card-title">  {{car.year}}  </h5>
+                                        <h5 class= "card-title">  {{car.make}}  </h5>
+                                        <img id = "price-tag" src = "/static/price-tag.png">
+                                        <p class="card-text">  {{car.price}}  </p>
+                                    </div>
+                                    <p class="card-text">  {{car.model}}  </p>
+                                </div>    
+                            
+                            <button @click="carinfo(car.id)" class="btn btn-primary"> View More Details </button>
+                        </div>
+                    </div>
+                
 
+            </li>
+
+            
         
     </div>
+    
     `,
     data: function() {
         return {
@@ -669,20 +677,58 @@ const CarInfo = {
     template: `
 
     <div>
-    <h2>  {{year}} </h2>  <h2> {{make}} </h2> <br> 
-    <p> {{model}} </p>  
-    <p> {{description}} </p> <br>
-    <p> {{colour}} </p> <br>
-    <p> {{car_type}} </p> <br>
-    <p> {{price}} </p> <br>
-    <p> {{transmission}} </p>
-    <img id="car_img" :src="'/static/uploads/' + photo" alt="car img"> 
+        <div class="container-fluid">
+            <div class="carinfocard">
+                <div class="img-square-wrapper">
+                    <img id="car_img" :src="'/static/uploads/' + photo" alt="car img" class="card-img-top"> 
+                </div>
 
-    <button class="btn btn-primary mb-2" > Email Owner </button>
+                <div class = "card-body">
+                    <div class = "yearmake">
+                            <h2 class = "card-title">  {{ year }} </h2> <br> 
+                            <h2 class = "card-title"> {{ make }} </h2> 
+                    </div>
 
-    <button v-if="faved" class="btn btn-primary mb-2" >  Already Favourited </button>
-    <button v-else" @click="favouritecar(car_id)" class="btn btn-primary mb-2" > Favourite </button>
-    
+                    <p class="model"> {{model}} </p>  
+                    <p class="card-text"> {{description}} </p>
+
+                    <div class = "form-row">
+                        <div class = "col">
+                            <label>Colour</label>
+                            <p class="card-text"> {{colour}} </p> <br>
+                        </div>
+
+                        <div class = "col">
+                            <label>Body Type</label>
+                            <p class="card-text"> {{car_type}} </p> <br>
+                        </div>
+                    </div>
+
+
+
+                    <div class = "form-row">
+                        <div class = "col">
+                            <label>Price</label>
+                            <p class="card-text"> {{price}} </p> <br>
+                        </div>
+
+                        <div class = "col">
+                            <label>Transmission</label>
+                            <p class="card-text"> {{transmission}} </p> <br>
+                        </div>
+                    </div>
+
+                    <div class = "carinfobtns">
+                        <button class="btn btn-success" > Email Owner </button>
+
+                        <button v-if="faved" type="button" class="btn btn-default btn-circle">
+                            <img src="/static/heart.png"> 
+                        </button>
+                        <button v-else" @click="favouritecar(car_id)" type = "button" class="btn btn-primary" > Favourite </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
     `,
@@ -762,32 +808,62 @@ const CarInfo = {
         props: ['user_id'],
         template: `
     
-        <div>
-        <h2>  {{user.name}} </h2>  <br> 
-        <h4> @{{user.username}} </h4>  
-        <p> {{user.biography}} </p> <br>
-        <p> Email </p> <p> {{user.email}} </p> <br>
-        <p> Location </p> <p> {{user.location}} </p> <br>
-        <p> Date Joined </p> <p> {{user.date_joined}} </p> <br>
+        <div class= "user-container">
 
+            <div class = "usercard">
+                <div class = "card-horizonatal">
+                    <img id="user_img" :src="'/static/uploads/' + user.photo" alt="user img" class = "card-img-left"> 
+                </div>
+
+                <div class="card-body">
+                    <h2 class = "card-title">  {{user.name}} </h2>  <br> 
+                    <h4 class = "card-text"> @{{user.username}} </h4>  
+                    <p class = "card-text"> {{user.biography}} </p> <br>
+                
+                    <div class = "form-row">
+
+                        <div class = "col">
+                            <label>Email</label>
+                            <p class="card-text"> {{user.email}} </p> <br>
+                        </div>
+
+                        <div class = "col">
+                            <label>Location</label>
+                            <p class="card-text"> {{user.location}} </p> <br>
+                        </div>
+
+                        <div class = "col">
+                            <label>Joined</label>
+                            <p class="card-text"> {{user.date_joined}} </p> <br>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
        
         
-        <img id="user_img" :src="'/static/uploads/' + user.photo" alt="user img"> 
         <h2> Cars Favourited </h2>
 
         
-        <ul>
-    <li v-for="car in allcars">
-
-    <img id="car_img" :src="'/static/uploads/' + car.photo" alt="car img"> 
-    <p>  {{car.year}}  </p>
-    <p>  {{car.price}}  </p>
-    <p>  {{car.model}}  </p>
-    <p>  {{car.make}}  </p>
-    <button @click="carinfo(car.id)"> View More Details </button>
-   
-
-    </li>
+    <ul>
+        <li v-for="car in allcars">
+            <div class = "details-card-group">
+                <div class ="details-card" style="width: 18rem;">
+                    <img class="card-img-top" id="car_img" :src="'/static/uploads/'  + car.photo" alt="car img"> 
+                        <div class = "card-body">
+                            <div class = "top-card">
+                                <h5 class = "card-title">  {{car.year}}  </h5>
+                                <h5 class= "card-title">  {{car.make}}  </h5>
+                                <img id = "price-tag" src = "/static/price-tag.png">
+                                <p class="card-text">  {{car.price}}  </p>
+                            </div>
+                            <p class="card-text">  {{car.model}}  </p>
+                        </div>    
+                    
+                    <button @click="carinfo(car.id)" class="btn btn-primary"> View More Details </button>
+                </div>
+            </div>
+        </li>
 
     </ul>
 
